@@ -87,7 +87,7 @@ public class TextRecognition {
 				System.out.println("REST Response:\n");
 				String text = "Size not found";
 				JSONArray JArr = json.getJSONArray("regions");
-				for (int k = 0; k < JArr.length(); k++) {
+				for (int k = 0; k < JArr.length(); k++) { 
 					JSONObject jsonObject1 = JArr.getJSONObject(k);
 					// System.out.println(jsonObject1);
 					JSONArray JLines = jsonObject1.getJSONArray("lines");
