@@ -40,82 +40,90 @@ public class TextRecognition {
 	// Also, if you want to use the celebrities model, change "landmarks" to
 	// "celebrities" here and in
 	// uriBuilder.setParameter to use the Celebrities model.
-	public static final String uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr";
 
-	public static void main(String[] args) {
-		HttpClient httpClient = new DefaultHttpClient();
+	 public static String getSize(String imgURLorString){
+		 HttpClient httpClient = new DefaultHttpClient();
+		 String uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr";
 
-		try {
-			// NOTE: You must use the same location in your REST call as you
-			// used to obtain your subscription keys.
-			// For example, if you obtained your subscription keys from westus,
-			// replace "westcentralus" in the
-			// URL below with "westus".
-			URIBuilder uriBuilder = new URIBuilder(uriBase);
+			try {
+				// NOTE: You must use the same location in your REST call as you
+				// used to obtain your subscription keys.
+				// For example, if you obtained your subscription keys from westus,
+				// replace "westcentralus" in the
+				// URL below with "westus".
+				URIBuilder uriBuilder = new URIBuilder(uriBase);
 
-			uriBuilder.setParameter("language", "unk");
-			uriBuilder.setParameter("detectOrientation ", "true");
+				uriBuilder.setParameter("language", "unk");
+				uriBuilder.setParameter("detectOrientation ", "true");
 
-			// Request parameters.
-			URI uri = uriBuilder.build();
-			HttpPost request = new HttpPost(uri);
+				// Request parameters.
+				URI uri = uriBuilder.build();
+				HttpPost request = new HttpPost(uri);
 
-			// Request headers.
-			request.setHeader("Content-Type", "application/json");
-			request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+				// Request headers.
+				request.setHeader("Content-Type", "application/json");
+				request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
 
-			// Request body.
-			StringEntity requestEntity = new StringEntity(
-					"{\"url\":\"https://www.printful.com/blog/wp-content/uploads/2014/01/Screen-Shot-2015-12-07-at-14.15.15.png\"}");
-			request.setEntity(requestEntity);
+				// Request body.
+				StringEntity requestEntity = new StringEntity("{\"url\":\"" + imgURLorString + "\"}");
+				request.setEntity(requestEntity);
 
-			// Execute the REST API call and get the response entity.
-			HttpResponse response = httpClient.execute(request);
-			HttpEntity entity = response.getEntity();
+				// Execute the REST API call and get the response entity.
+				HttpResponse response = httpClient.execute(request);
+				HttpEntity entity = response.getEntity();
 
-			if (entity != null) {
-				// Format and display the JSON response.
-				ArrayList<String> sizes = new ArrayList<String>();
-				sizes.add("s");
-				sizes.add("m");
-				sizes.add("l");
-				sizes.add("xl");
-				sizes.add("xs");
-				sizes.add("medium");
-				sizes.add("large");
-				sizes.add("small");
-				
-				String size = "size not recognised";
-				String jsonString = EntityUtils.toString(entity);
-				JSONObject json = new JSONObject(jsonString);
+				if (entity != null) {
+					// Format and display the JSON response.
+					ArrayList<String> sizes = new ArrayList<String>();
+					sizes.add("s");
+					sizes.add("m");
+					sizes.add("l");
+					sizes.add("xl");
+					sizes.add("xs");
+					sizes.add("medium");
+					sizes.add("large");
+					sizes.add("small");
+					
+					String size = "size not recognised";
+					String jsonString = EntityUtils.toString(entity);
+					JSONObject json = new JSONObject(jsonString);
 
-				String text = "Size not found";
-				JSONArray JArr = json.getJSONArray("regions");
-				for (int k = 0; k < JArr.length(); k++) { 
-					JSONObject jsonObject1 = JArr.getJSONObject(k);
-					// System.out.println(jsonObject1);
-					JSONArray JLines = jsonObject1.getJSONArray("lines");
-					for (int i = 0; i < JLines.length(); i++) {
-						JSONObject JLineArr = JLines.getJSONObject(i);
-						JSONArray JWords = JLineArr.getJSONArray("words");
-						for (int j = 0; j < JWords.length(); j++) {
-							JSONObject JWordArr = JWords.getJSONObject(j);
-							String qwe = JWordArr.get("text").toString().toLowerCase();
-							if (sizes.contains(qwe)){
-								size=qwe;
+					String text = "Size not found";
+					JSONArray JArr = json.getJSONArray("regions");
+					for (int k = 0; k < JArr.length(); k++) { 
+						JSONObject jsonObject1 = JArr.getJSONObject(k);
+						// System.out.println(jsonObject1);
+						JSONArray JLines = jsonObject1.getJSONArray("lines");
+						for (int i = 0; i < JLines.length(); i++) {
+							JSONObject JLineArr = JLines.getJSONObject(i);
+							JSONArray JWords = JLineArr.getJSONArray("words");
+							for (int j = 0; j < JWords.length(); j++) {
+								JSONObject JWordArr = JWords.getJSONObject(j);
+								String qwe = JWordArr.get("text").toString().toLowerCase();
+								if (sizes.contains(qwe)){
+									size=qwe;
+								}
 							}
 						}
 					}
+					
+					return size;
 				}
-				System.out.print("size: ");
-				System.out.println(size);
 			}
-		}
 
 
-		catch (Exception e) {
-			// Display error message.
-			System.out.println(e.getMessage());
-		}
+			catch (Exception e) {
+				// Display error message.
+				System.out.println(e.getMessage());
+			}
+			return null;
+		 
+		 
+	 }
+	
+	
+	public static void main(String[] args) {
+		String size = getSize("https://realthread.s3.amazonaws.com/cms%2F1443739324065-printed_tag_480.jpg");
+		System.out.println(size);
 	}
 }

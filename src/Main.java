@@ -32,10 +32,10 @@ public class Main
     //
     // NOTE: Free trial subscription keys are generated in the westcentralus region, so if you are using
     // a free trial subscription key, you should not need to change this region.
-    public static final String uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/analyze";
     
     public static JSONObject getDescription(String imgURLorString){
     	 HttpClient httpclient = new DefaultHttpClient();
+    	 String uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/analyze";
 
          try
          {
@@ -108,11 +108,93 @@ public class Main
          }
 		return null;
     }
+    
+	 public static String getSize(String imgURLorString){
+		 HttpClient httpClient = new DefaultHttpClient();
+		 String uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr";
+
+			try {
+				// NOTE: You must use the same location in your REST call as you
+				// used to obtain your subscription keys.
+				// For example, if you obtained your subscription keys from westus,
+				// replace "westcentralus" in the
+				// URL below with "westus".
+				URIBuilder uriBuilder = new URIBuilder(uriBase);
+
+				uriBuilder.setParameter("language", "unk");
+				uriBuilder.setParameter("detectOrientation ", "true");
+
+				// Request parameters.
+				URI uri = uriBuilder.build();
+				HttpPost request = new HttpPost(uri);
+
+				// Request headers.
+				request.setHeader("Content-Type", "application/json");
+				request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+				// Request body.
+				StringEntity requestEntity = new StringEntity("{\"url\":\"" + imgURLorString + "\"}");
+				request.setEntity(requestEntity);
+
+				// Execute the REST API call and get the response entity.
+				HttpResponse response = httpClient.execute(request);
+				HttpEntity entity = response.getEntity();
+
+				if (entity != null) {
+					// Format and display the JSON response.
+					ArrayList<String> sizes = new ArrayList<String>();
+					sizes.add("s");
+					sizes.add("m");
+					sizes.add("l");
+					sizes.add("xl");
+					sizes.add("xs");
+					sizes.add("medium");
+					sizes.add("large");
+					sizes.add("small");
+					
+					String size = "size not recognised";
+					String jsonString = EntityUtils.toString(entity);
+					JSONObject json = new JSONObject(jsonString);
+
+					String text = "Size not found";
+					JSONArray JArr = json.getJSONArray("regions");
+					for (int k = 0; k < JArr.length(); k++) { 
+						JSONObject jsonObject1 = JArr.getJSONObject(k);
+						// System.out.println(jsonObject1);
+						JSONArray JLines = jsonObject1.getJSONArray("lines");
+						for (int i = 0; i < JLines.length(); i++) {
+							JSONObject JLineArr = JLines.getJSONObject(i);
+							JSONArray JWords = JLineArr.getJSONArray("words");
+							for (int j = 0; j < JWords.length(); j++) {
+								JSONObject JWordArr = JWords.getJSONObject(j);
+								String qwe = JWordArr.get("text").toString().toLowerCase();
+								if (sizes.contains(qwe)){
+									size=qwe;
+								}
+							}
+						}
+					}
+					
+					return size;
+				}
+			}
+
+
+			catch (Exception e) {
+				// Display error message.
+				System.out.println(e.getMessage());
+			}
+			return null;
+		 
+		 
+	 }
 
     public static void main(String[] args)
     {
-    	String url = "https://thefuturewear.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/r/e/red-roundneck-front-male_1.jpg";
-       JSONObject redShirt = getDescription(url);
+    	String urlClothe = "https://thefuturewear.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/r/e/red-roundneck-front-male_1.jpg";
+       JSONObject redShirt = getDescription(urlClothe);
        System.out.println(redShirt.toString());
+       String urlTag = "https://realthread.s3.amazonaws.com/cms%2F1443739324065-printed_tag_480.jpg";
+       System.out.println(getSize(urlTag));
     }
 }
