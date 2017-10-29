@@ -66,7 +66,7 @@ public class TextRecognition {
 
 			// Request body.
 			StringEntity requestEntity = new StringEntity(
-					"{\"url\":\"https://realthread.s3.amazonaws.com/cms%2F1443739324065-printed_tag_480.jpg\"}");
+					"{\"url\":\"https://www.printful.com/blog/wp-content/uploads/2014/01/Screen-Shot-2015-12-07-at-14.15.15.png\"}");
 			request.setEntity(requestEntity);
 
 			// Execute the REST API call and get the response entity.
@@ -81,10 +81,14 @@ public class TextRecognition {
 				sizes.add("l");
 				sizes.add("xl");
 				sizes.add("xs");
+				sizes.add("medium");
+				sizes.add("large");
+				sizes.add("small");
+				
 				String size = "size not recognised";
 				String jsonString = EntityUtils.toString(entity);
 				JSONObject json = new JSONObject(jsonString);
-				System.out.println("REST Response:\n");
+
 				String text = "Size not found";
 				JSONArray JArr = json.getJSONArray("regions");
 				for (int k = 0; k < JArr.length(); k++) { 
@@ -103,6 +107,7 @@ public class TextRecognition {
 						}
 					}
 				}
+				System.out.print("size: ");
 				System.out.println(size);
 			}
 		}

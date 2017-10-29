@@ -33,80 +33,86 @@ public class Main
     // NOTE: Free trial subscription keys are generated in the westcentralus region, so if you are using
     // a free trial subscription key, you should not need to change this region.
     public static final String uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/analyze";
+    
+    public static JSONObject getDescription(String imgURLorString){
+    	 HttpClient httpclient = new DefaultHttpClient();
+
+         try
+         {
+             URIBuilder builder = new URIBuilder(uriBase);
+
+             // Request parameters. All of them are optional.
+             builder.setParameter("visualFeatures", "Description,Color");
+             builder.setParameter("language", "en");
+
+             // Prepare the URI for the REST API call.
+             URI uri = builder.build();
+             HttpPost request = new HttpPost(uri);
+
+             // Request headers.
+             request.setHeader("Content-Type", "application/json");
+             request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+             // Request body.
+             StringEntity reqEntity = new StringEntity("{\"url\":\"" + imgURLorString + "\"}");
+             
+             request.setEntity(reqEntity);
+
+             // Execute the REST API call and get the response entity.
+             HttpResponse response = httpclient.execute(request);
+             HttpEntity entity = response.getEntity();
+
+             if (entity != null)
+             {
+                 // Format and display the JSON response.
+                 String jsonString = EntityUtils.toString(entity);
+                 JSONObject json = new JSONObject(jsonString);
+
+                 
+                 //System.out.println(json.toString(2));
+                 
+                 String colour = json.getJSONObject("color").get("dominantColorForeground").toString();
+                 JSONArray descriptions = (json.getJSONObject("description").getJSONArray("tags"));
+                 ArrayList<String> tags = new ArrayList<String>();
+                 
+                 ArrayList<String> clothes = new ArrayList<String>();
+                 clothes.add("jacket");
+                 clothes.add("pant");
+                 clothes.add("suit");
+                 clothes.add("shirt");
+                 clothes.add("hat");
+                 clothes.add("sweater");
+                 clothes.add("pants");
+                 clothes.add("dress");
+                 clothes.add("shoes");
+                 clothes.add("sock");
+                 
+                 for (int i = 0; i < descriptions.length(); i++){
+                 	if (clothes.contains(descriptions.get(i))){
+                 	tags.add(descriptions.getString(i));
+                 	}
+                 }
+                 
+                 // new json onject with a string colour, and a JSON array tags.
+                 JSONObject info = new JSONObject();
+                 info.put("tags", tags);
+                 info.put("colour", colour);
+
+                 return info;
+             }
+         }
+         catch (Exception e)
+         {
+             // Display error message.
+             System.out.println(e.getMessage());
+         }
+		return null;
+    }
 
     public static void main(String[] args)
     {
-        HttpClient httpclient = new DefaultHttpClient();
-
-        try
-        {
-            URIBuilder builder = new URIBuilder(uriBase);
-
-            // Request parameters. All of them are optional.
-            builder.setParameter("visualFeatures", "Description,Color");
-            builder.setParameter("language", "en");
-
-            // Prepare the URI for the REST API call.
-            URI uri = builder.build();
-            HttpPost request = new HttpPost(uri);
-
-            // Request headers.
-            request.setHeader("Content-Type", "application/json");
-            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-            // Request body.
-            StringEntity reqEntity = new StringEntity("{\"url\":\"http://www.esquireclothing.com/images/products/verylarge/Black_Crew_Neck_Jumper_Remus_Black_Jumper_1.jpg\"}");
-            
-            request.setEntity(reqEntity);
-
-            // Execute the REST API call and get the response entity.
-            HttpResponse response = httpclient.execute(request);
-            HttpEntity entity = response.getEntity();
-
-            if (entity != null)
-            {
-                // Format and display the JSON response.
-                String jsonString = EntityUtils.toString(entity);
-                JSONObject json = new JSONObject(jsonString);
-
-                
-                //System.out.println(json.toString(2));
-                
-                String colour = json.getJSONObject("color").get("dominantColorForeground").toString();
-                JSONArray descriptions = (json.getJSONObject("description").getJSONArray("tags"));
-                ArrayList<String> tags = new ArrayList<String>();
-                
-                ArrayList<String> clothes = new ArrayList<String>();
-                clothes.add("jacket");
-                clothes.add("pant");
-                clothes.add("suit");
-                clothes.add("shirt");
-                clothes.add("hat");
-                clothes.add("sweater");
-                clothes.add("pants");
-                clothes.add("dress");
-                clothes.add("shoes");
-                clothes.add("sock");
-                
-                for (int i = 0; i < descriptions.length(); i++){
-                	if (clothes.contains(descriptions.get(i))){
-                	tags.add(descriptions.getString(i));
-                	}
-                }
-                
-                // new json onject with a string colour, and a JSON array tags.
-                JSONObject info = new JSONObject();
-                info.put("tags", tags);
-                info.put("colour", colour);
-                		
-                System.out.println(info.toString(2));
-                
-            }
-        }
-        catch (Exception e)
-        {
-            // Display error message.
-            System.out.println(e.getMessage());
-        }
+    	String url = "https://thefuturewear.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/r/e/red-roundneck-front-male_1.jpg";
+       JSONObject redShirt = getDescription(url);
+       System.out.println(redShirt.toString());
     }
 }
